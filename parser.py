@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+"""Парсер по уже заданным фильтрам стоимости и года"""
 
 def get_parser_av():
     url = 'https://cars.av.by/filter?year[min]=2014&price_usd[max]=4500'
@@ -70,6 +71,7 @@ def get_parser_av():
 get_parser_av()
 
 
+"""Проверка на наличие новых обьявлений по заданным параметрам"""
 
 def check_cars_update():
     fresh_cars = {}
@@ -129,8 +131,10 @@ def check_cars_update():
 print(check_cars_update())
 
 
-def get_parser_av_filters():
-    url = 'https://cars.av.by/filter'
+""" Парсер по заданным параметрам пользователем """
+
+def get_parser_av_filters(min_year, max_price):
+    url = f'https://cars.av.by/filter?year[min]={min_year}&price_usd[max]={max_price}'
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'}
     # Инициализируем счетчик
     count = 0
@@ -191,7 +195,7 @@ def get_parser_av_filters():
         print(f'Спарсировано объявлений: {count}')
 
 
-    with open ('pars_avby.json', 'w', encoding='utf-8') as file:
+    with open ('pars_avby_filter.json', 'w', encoding='utf-8') as file:
         json.dump(cars_dict, file, indent=4, ensure_ascii=False)
 
-get_parser_av()
+
