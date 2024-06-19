@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, types, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
-from config import token, user_id
+from config import TOKEN, user_id
 from aiogram.enums import ParseMode
 from aiogram.utils.markdown import hbold, hunderline, hcode, hlink
 from parser import check_cars_update, get_parser_av_filters
@@ -15,7 +15,7 @@ from aiogram.filters.command import Command
 
 
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token=token)
+bot = Bot(token=TOKEN)
 dp = Dispatcher()
 form_router = Router()
 
@@ -34,7 +34,9 @@ async def start(message: types.Message):
 
     ]
     keyboard = ReplyKeyboardMarkup(keyboard=start_buttons,resize_keyboard=True)
+    logging.info(f"Бот запущен: {message.text}")
     await message.answer('Лента объявлений', reply_markup=keyboard)
+
 
 @dp.message(lambda message: message.text and "Описание" in message.text)
 async def about_bot(message: types.Message):
@@ -82,6 +84,7 @@ async def filer_car(message: types.Message,  state: FSMContext):
     await message.answer(instruction_text)
     await asyncio.sleep(3)
     try:
+
         await message.answer("Введите минимальный год выпуска:")
     except ValueError:
         await message.answer("Пожалуйста, введите корректное число для года выпуска.")
@@ -93,10 +96,12 @@ async def filer_car(message: types.Message,  state: FSMContext):
 async def get_min_year(message: types.Message, state: FSMContext):
     try:
         min_year = int(message.text)
-        await state.update_data(min_year=min_year)
-
-        await message.answer("Введите максимальную цену в USD:")
-        await state.set_state(Form.get_max_price)  # Переход к следующему состоянию
+        if 1900 <= min_year <= 2100:
+            await state.update_data(min_year=min_year)
+            await message.answer("Введите максимальную цену в USD:")
+            await state.set_state(Form.get_max_price)  # Переход к следующему состоянию
+        else:
+            await message.answer("Пожалуйста, введите четырехзначное число для года выпуска (например, 2023).")
     except ValueError:
         await message.answer("Пожалуйста, введите корректное число для года выпуска.")
 
@@ -106,17 +111,28 @@ async def get_max_price(message: types.Message, state: FSMContext):
     try:
 
         max_price = int(message.text)
+        if max_price <= 0:
+            await message.answer("Пожалуйста, введите корректное число для максимальной цены.")
+            return
+
         user_data = await state.get_data()
         min_year = user_data['min_year']
-        parser_response = get_parser_av_filters(min_year, max_price)
-        print(parser_response, 'parser_response')
-        with open('pars_avby_filter.json', 'r', encoding='utf-8') as file:
-            cars_dict = json.load(file)
 
-        response_finished = len(cars_dict)
+        parser_response = get_parser_av_filters(min_year, max_price)
+
+        if not parser_response:
+            await message.answer("Не найдено объявлений, соответствующих указанным параметрам.")
+            return
+
+        # with open('pars_avby_filter.json', 'r', encoding='utf-8') as file:
+        #     cars_dict = json.load(file)
+
+
+
+        response_finished = len(parser_response)
         await message.answer(f'Всего найдено объявлений: {response_finished}')
 
-        for k, v in cars_dict.items():
+        for k, v in parser_response.items():
             car_url = v.get("car_url", "URL не указан")
             car_about_title = v.get("car_about_title", "Название не указано")
             car_params = v.get("car_params", "Параметры не указаны")
@@ -146,6 +162,7 @@ async def get_max_price(message: types.Message, state: FSMContext):
 async def get_fresh_cars(message: types.Message):
     fresh_cars = check_cars_update()
     if len(fresh_cars) >= 1:
+        await bot.send_message(user_id, f'Найдено новых объявлений: {len(fresh_cars)}')
         for k, v in fresh_cars.items():
             car_url = v.get("car_url", "URL не указан")
             car_about_title = v.get("car_about_title", "Название не указано")
@@ -169,13 +186,13 @@ async def get_fresh_cars(message: types.Message):
         await message.answer('Пока нет свежий объявлений')
 
 
-
-
-
-async def news_car_every_hour():
+async def check_update_cars():
     while True:
         fresh_cars = check_cars_update()
+
         if len(fresh_cars) >= 1:
+            await bot.send_message(user_id, f'Найдено новых объявлений: {len(fresh_cars)}')
+
             for k, v in fresh_cars.items():
                 car_url = v.get("car_url", "URL не указан")
                 car_about_title = v.get("car_about_title", "Название не указано")
@@ -198,10 +215,16 @@ async def news_car_every_hour():
             await bot.send_message(user_id, 'Пока нет свежий объявлений', disable_notification=True)
         await asyncio.sleep(600)
 
+
+@dp.message()
+async def unknow_message(message:types.Message):
+    await message.answer("Извините, я не понимаю эту команду. Пожалуйста, выберите одну из опций на клавиатуре.")
+
+
 async def main():
     await asyncio.gather(
         dp.start_polling(bot),
-        news_car_every_hour()
+        check_update_cars()
     )
 
 if __name__ == "__main__":
