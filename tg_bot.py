@@ -162,8 +162,9 @@ async def get_max_price(message: types.Message, state: FSMContext):
         await message.answer("Пожалуйста, введите корректное число для цены.")
 
 
-@dp.message(lambda message: message.text and "Новые объявления" in message.text)
-async def get_fresh_cars(message: types.Message):
+@dp.message(lambda message: message.text and "Новые объявления" in message.text, state="*")
+async def get_fresh_cars(message: types.Message, state: FSMContext):
+    await state.clear()
     fresh_cars = check_cars_update()
     if len(fresh_cars) >= 1:
         await bot.send_message(user_id, f'Найдено новых объявлений: {len(fresh_cars)}')
