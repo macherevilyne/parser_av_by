@@ -49,7 +49,10 @@ async def about_bot(message: types.Message):
 async def get_all_cars(message: types.Message):
     with open('pars_avby.json', 'r', encoding='utf-8') as file:
         cars_dict = json.load(file)
-    print(cars_dict)
+
+    response_finished = len(cars_dict)
+    await message.answer(f'Всего найдено объявлений: {response_finished}')
+
     response_ = 'Бот делает выборку машин по заранее определенному фильтру,' \
                 'год машины от 2014г и стоимость авто до 4500 $'
     await message.answer(response_)
