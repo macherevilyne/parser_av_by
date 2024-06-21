@@ -24,7 +24,7 @@ class Form(StatesGroup):
     get_max_price = State()
 
 
-@dp.message(Command("start"))
+@dp.message(Command("start" ))
 async def start(message: types.Message):
     start_buttons = [
         [KeyboardButton(text='Описание бота')],
@@ -45,8 +45,9 @@ async def about_bot(message: types.Message):
     await message.answer(response_)
 
 
-@dp.message(lambda message: message.text and "Все объявления" in message.text)
-async def get_all_cars(message: types.Message):
+@dp.message(lambda message: message.text and "Все объявления" in message.text, state="*")
+async def get_all_cars(message: types.Message, state: FSMContext):
+    await state.clear()
     with open('pars_avby.json', 'r', encoding='utf-8') as file:
         cars_dict = json.load(file)
     print(cars_dict)
@@ -74,8 +75,9 @@ async def get_all_cars(message: types.Message):
         await asyncio.sleep(1)  # Задержка между отправкой сообщений, чтобы избежать лимитов
 
 
-@dp.message(lambda message: message.text and "Фильтр"in message.text)
+@dp.message(lambda message: message.text and "Фильтр"in message.text, state="*")
 async def filer_car(message: types.Message,  state: FSMContext):
+    await state.clear()
     instruction_text = (
         "Инструкция по использованию фильтра:\n"
         "1. Выберите минимальный год выпуска автомобиля.\n"
@@ -153,7 +155,7 @@ async def get_max_price(message: types.Message, state: FSMContext):
             await asyncio.sleep(1)
 
 
-        await state.clear()  # Завершение состояния
+        await state.clear()  # Завершение состояния после обработки
 
     except ValueError:
         logging.error(f"Ошибка преобразования цены: {message.text}")
