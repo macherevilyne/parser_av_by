@@ -103,13 +103,14 @@ async def get_min_year(message: types.Message, state: FSMContext):
         else:
             await message.answer("Пожалуйста, введите четырехзначное число для года выпуска (например, 2023).")
     except ValueError:
+        logging.error(f"Ошибка преобразования года выпуска: {message.text}")
         await message.answer("Пожалуйста, введите корректное число для года выпуска.")
 
 
 @dp.message(Form.get_max_price)
 async def get_max_price(message: types.Message, state: FSMContext):
     try:
-
+        logging.debug(f"Получен ввод для максимальной цены: {message.text}")
         max_price = int(message.text)
         if max_price <= 0:
             await message.answer("Пожалуйста, введите корректное число для максимальной цены.")
@@ -117,7 +118,7 @@ async def get_max_price(message: types.Message, state: FSMContext):
 
         user_data = await state.get_data()
         min_year = user_data['min_year']
-
+        logging.debug(f"Фильтры: год выпуска - {min_year}, максимальная цена - {max_price}")
         parser_response = get_parser_av_filters(min_year, max_price)
 
         if not parser_response:
@@ -155,6 +156,7 @@ async def get_max_price(message: types.Message, state: FSMContext):
         await state.clear()  # Завершение состояния
 
     except ValueError:
+        logging.error(f"Ошибка преобразования цены: {message.text}")
         await message.answer("Пожалуйста, введите корректное число для цены.")
 
 
