@@ -24,7 +24,7 @@ class Form(StatesGroup):
     get_max_price = State()
 
 
-@dp.message(Command("start" ))
+@dp.message(Command("start"))
 async def start(message: types.Message):
     start_buttons = [
         [KeyboardButton(text='Описание бота')],
@@ -45,9 +45,8 @@ async def about_bot(message: types.Message):
     await message.answer(response_)
 
 
-@dp.message(lambda message: message.text and "Все объявления" in message.text, state="*")
-async def get_all_cars(message: types.Message, state: FSMContext):
-    await state.clear()
+@dp.message(lambda message: message.text and "Все объявления" in message.text)
+async def get_all_cars(message: types.Message):
     with open('pars_avby.json', 'r', encoding='utf-8') as file:
         cars_dict = json.load(file)
     print(cars_dict)
@@ -75,9 +74,8 @@ async def get_all_cars(message: types.Message, state: FSMContext):
         await asyncio.sleep(1)  # Задержка между отправкой сообщений, чтобы избежать лимитов
 
 
-@dp.message(lambda message: message.text and "Фильтр"in message.text, state="*")
+@dp.message(lambda message: message.text and "Фильтр"in message.text)
 async def filer_car(message: types.Message,  state: FSMContext):
-    await state.clear()
     instruction_text = (
         "Инструкция по использованию фильтра:\n"
         "1. Выберите минимальный год выпуска автомобиля.\n"
@@ -155,16 +153,15 @@ async def get_max_price(message: types.Message, state: FSMContext):
             await asyncio.sleep(1)
 
 
-        await state.clear()  # Завершение состояния после обработки
+        await state.clear()  # Завершение состояния
 
     except ValueError:
         logging.error(f"Ошибка преобразования цены: {message.text}")
         await message.answer("Пожалуйста, введите корректное число для цены.")
 
 
-@dp.message(lambda message: message.text and "Новые объявления" in message.text, state="*")
-async def get_fresh_cars(message: types.Message, state: FSMContext):
-    await state.clear()
+@dp.message(lambda message: message.text and "Новые объявления" in message.text)
+async def get_fresh_cars(message: types.Message):
     fresh_cars = check_cars_update()
     if len(fresh_cars) >= 1:
         await bot.send_message(user_id, f'Найдено новых объявлений: {len(fresh_cars)}')
