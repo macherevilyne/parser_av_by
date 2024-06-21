@@ -123,11 +123,8 @@ async def get_max_price(message: types.Message, state: FSMContext):
 
         if not parser_response:
             await message.answer("Не найдено объявлений, соответствующих указанным параметрам.")
+            await state.clear()
             return
-
-        # with open('pars_avby_filter.json', 'r', encoding='utf-8') as file:
-        #     cars_dict = json.load(file)
-
 
 
         response_finished = len(parser_response)
