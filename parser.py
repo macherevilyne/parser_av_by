@@ -56,10 +56,8 @@ def get_parser_av():
         print(f'Спарсировано объявлений: {count}')
 
 
-    if cars_dict:
-        file_path = 'pars_avby.json'
-        with open(file_path, 'w', encoding='utf-8') as file:
-            json.dump(cars_dict, file, indent=4, ensure_ascii=False)
+    with open ('pars_avby.json', 'w', encoding='utf-8') as file:
+        json.dump(cars_dict, file, indent=4, ensure_ascii=False)
 
 get_parser_av()
 

@@ -1,8 +1,6 @@
 import asyncio
 import json
 import logging
-import os
-
 from aiogram import Bot, Dispatcher, types, Router
 
 from aiogram.fsm.context import FSMContext
@@ -11,7 +9,7 @@ from aiogram.fsm.state import State, StatesGroup
 from config import TOKEN, user_id
 from aiogram.enums import ParseMode
 from aiogram.utils.markdown import hbold, hunderline, hcode, hlink
-from parser import check_cars_update, get_parser_av_filters, get_parser_av
+from parser import check_cars_update, get_parser_av_filters
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters.command import Command
 
@@ -38,13 +36,6 @@ async def start(message: types.Message):
     keyboard = ReplyKeyboardMarkup(keyboard=start_buttons,resize_keyboard=True)
     logging.info(f"Бот запущен: {message.text}")
     await message.answer('Лента объявлений', reply_markup=keyboard)
-
-async def on_startup(dispatcher):
-    # Проверяем наличие файла при старте бота
-    file_path = 'pars_avby.json'
-    if not os.path.exists(file_path):
-        logging.info(f'File {file_path} not found, creating...')
-        get_parser_av()  # Вызываем парсер для создания файла при первом запуске
 
 
 @dp.message(lambda message: message.text and "Описание" in message.text)

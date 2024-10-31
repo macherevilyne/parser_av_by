@@ -1,4 +1,4 @@
-Бот парсит с AV.by все объявление по параметрам машины с 2014года и стоимостью не выше 4500$.
-Бот имеет функцию показать все объявления по этим параметрам, а так же у вас есть возможность сделать свой фильтр машин,
-указать год и стоимость авто
-Все что нужно сделать запустить файл tg_bot.py
+The bot parses with AV.by all the announcement on the parameters of the car since 2014 and the cost is not higher than $ 4,500.
+The bot has the function to show all ads according to these parameters, as well as you have the opportunity to make your own car filter,
+specify the year and cost of the car
+All you need to do is run the file tg_bot.py
